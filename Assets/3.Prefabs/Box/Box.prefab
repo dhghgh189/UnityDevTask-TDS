@@ -419,7 +419,7 @@ GameObject:
   m_Component:
   - component: {fileID: 360675798204360400}
   - component: {fileID: 5383121804700163237}
-  m_Layer: 9
+  m_Layer: 6
   m_Name: Box
   m_TagString: Hero
   m_Icon: {fileID: 0}
