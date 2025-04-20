@@ -6,9 +6,16 @@ public class Truck : MonoBehaviour
 {
     [SerializeField] private float moveSpeed;
 
-    private void Update()
+    private Rigidbody2D rb;
+
+    private void Awake()
     {
-        // 매 프레임 오른쪽으로 이동  
-        transform.position += Vector3.right * moveSpeed * Time.deltaTime;
+        rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void FixedUpdate()
+    {
+        // 고정된 주기마다 오른쪽으로 이동
+        rb.velocity = Vector3.right * moveSpeed;
     }
 }

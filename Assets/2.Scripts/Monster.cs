@@ -14,6 +14,7 @@ public class Monster : MonoBehaviour
     [SerializeField] private Transform rayOrigin;       // 레이캐스트 시작점 트랜스폼
     private EMonsterState curState;                     // 현재 상태
     private Animator anim;                              // Animator 캐시
+    private Rigidbody2D rb;                             // Rigidbody2D 캐시
 
     private int isAttackingHash = Animator.StringToHash("IsAttacking");
     private int isDeadHash = Animator.StringToHash("IsDead");
@@ -26,6 +27,21 @@ public class Monster : MonoBehaviour
         curState = EMonsterState.Move;
         // Animator 컴포넌트 캐시
         anim = GetComponent<Animator>();
+        // Rigidbody2D 컴포넌트 캐시
+        rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void FixedUpdate()
+    {
+        if (curState == EMonsterState.Move)
+        {
+            // 고정된 주기마다 왼쪽으로 이동
+            rb.velocity = Vector2.left * moveSpeed;
+        }
+        else
+        {
+            rb.velocity = Vector2.zero;
+        }
     }
 
     void Update()
@@ -53,9 +69,6 @@ public class Monster : MonoBehaviour
 
     protected virtual void UpdateMove()
     {
-        // 매 프레임 왼쪽으로 이동 
-        transform.position += Vector3.left * moveSpeed * Time.deltaTime;
-
         // 감지되는 물체가 있으면 Attack 상태로 변경 (임시)
         Debug.DrawRay(rayOrigin.position, Vector2.left * raycastRange, Color.red);
         hit = Physics2D.Raycast(rayOrigin.position, Vector2.left, raycastRange, whatIsTarget);
