@@ -43,3 +43,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Lane0
+    uniqueID: 2869643297
+    locked: 0
+  - name: Lane1
+    uniqueID: 966118463
+    locked: 0
+  - name: Lane2
+    uniqueID: 276362641
+    locked: 0
