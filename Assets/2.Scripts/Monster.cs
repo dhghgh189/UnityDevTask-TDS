@@ -1,7 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using UnityEditor;
 using UnityEngine;
 
 public class Monster : MonoBehaviour
@@ -15,6 +12,7 @@ public class Monster : MonoBehaviour
     [SerializeField] private Transform rayOrigin;       // 레이캐스트 시작점 트랜스폼
     [SerializeField] private float jumpInterval;        // 점프 쿨타임
     [SerializeField] private float jumpForce;           // 점프 힘
+
     private EMonsterState curState;                     // 현재 상태
     private Animator anim;                              // Animator 캐시
     private Rigidbody2D rb;                             // Rigidbody2D 캐시
@@ -23,29 +21,28 @@ public class Monster : MonoBehaviour
     private int isAttackingHash = Animator.StringToHash("IsAttacking");
     private int isDeadHash = Animator.StringToHash("IsDead");
 
-    private Vector3 leftRayOrigin;                      // 왼쪽에 위치한 물체를 레이캐스트하기 위한 원점
-    private Vector3 groundRayOrigin;                    // 아래에 위치한 물체를 레이캐스트하기 위한 원점
+    private Vector3 leftRayOffset;                      // 왼쪽에 위치한 물체를 레이캐스트하기 위한 원점 offset
+    private Vector3 groundRayOffset;                    // 아래에 위치한 물체를 레이캐스트하기 위한 원점 offset
+
     private RaycastHit2D hit;
     private RaycastHit2D groundHit;
 
-    private bool isJump;
     private float nextJumpTime;
 
     [SerializeField] private bool isGrounded;
 
     private void Awake()
     {
-        // 상태 초기화
+        // 초기 상태 = move
         curState = EMonsterState.Move;
-        // Animator 컴포넌트 캐시
+
         anim = GetComponent<Animator>();
-        // Rigidbody2D 컴포넌트 캐시
         rb = GetComponent<Rigidbody2D>();
-        // CapsuleCollider2D 컴포넌트 캐시
         coll = GetComponent<CapsuleCollider2D>();
 
-        leftRayOrigin = Vector3.left * (coll.size.x * 0.55f);
-        groundRayOrigin = Vector3.down * (coll.size.y * 0.501f);
+        // 각 방향의 레이캐스트 진행을 위한 원점 offset
+        leftRayOffset = Vector3.left * (coll.size.x * 0.55f);
+        groundRayOffset = Vector3.down * (coll.size.y * 0.501f);
     }
 
     private void FixedUpdate()
@@ -85,8 +82,8 @@ public class Monster : MonoBehaviour
     protected virtual void UpdateMove()
     {
         // 감지되는 물체가 있으면 Attack 상태로 변경 (임시)
-        Debug.DrawRay(rayOrigin.position + leftRayOrigin, Vector2.left * raycastRange, Color.red);
-        hit = Physics2D.Raycast(rayOrigin.position + leftRayOrigin, Vector2.left, raycastRange, whatIsTarget);
+        Debug.DrawRay(rayOrigin.position + leftRayOffset, Vector2.left * raycastRange, Color.red);
+        hit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
 
         if (hit.collider == null)
             return;
@@ -106,8 +103,8 @@ public class Monster : MonoBehaviour
     protected virtual void UpdateAttack()
     {
         // 감지되는 물체가 없으면 Move 상태로 변경
-        Debug.DrawRay(rayOrigin.position + leftRayOrigin, Vector2.left * raycastRange, Color.red);
-        hit = Physics2D.Raycast(rayOrigin.position + leftRayOrigin, Vector2.left, raycastRange, whatIsTarget);
+        Debug.DrawRay(rayOrigin.position + leftRayOffset, Vector2.left * raycastRange, Color.red);
+        hit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
         if (hit.collider == null)
         {
             curState = EMonsterState.Move;
@@ -127,8 +124,8 @@ public class Monster : MonoBehaviour
 
     private void CheckGround()
     {
-        Debug.DrawRay(rayOrigin.position + groundRayOrigin, Vector2.down * raycastRange, Color.blue);
-        groundHit = Physics2D.Raycast(rayOrigin.position + groundRayOrigin, Vector2.down, raycastRange, 1 << gameObject.layer);
+        Debug.DrawRay(rayOrigin.position + groundRayOffset, Vector2.down * raycastRange, Color.blue);
+        groundHit = Physics2D.Raycast(rayOrigin.position + groundRayOffset, Vector2.down, raycastRange, 1 << gameObject.layer);
         isGrounded = groundHit.collider != null;
     }
 
