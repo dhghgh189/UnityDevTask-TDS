@@ -72,6 +72,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   raycastRange: 0.125
+  headCheckRange: 0.05
   whatIsTarget:
     serializedVersion: 2
     m_Bits: 64

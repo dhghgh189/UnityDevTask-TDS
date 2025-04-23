@@ -8,10 +8,12 @@ public class Monster : MonoBehaviour
 
     [SerializeField] private float moveSpeed;           // 이동 속도
     [SerializeField] private float raycastRange;        // 레이캐스트 사거리
+    [SerializeField] private float headCheckRange;      // 머리 체크 사거리
     [SerializeField] private LayerMask whatIsTarget;    // 레이캐스트 타겟을 구분하기 위한 layerMask 
     [SerializeField] private Transform rayOrigin;       // 레이캐스트 시작점 트랜스폼
     [SerializeField] private float jumpInterval;        // 점프 쿨타임
     [SerializeField] private float jumpForce;           // 점프 힘
+    [SerializeField] private float backstepTime;        // 백 스텝 진행시간
 
     private EMonsterState curState;                     // 현재 상태
     private Animator anim;                              // Animator 캐시
@@ -23,13 +25,19 @@ public class Monster : MonoBehaviour
 
     private Vector3 leftRayOffset;                      // 왼쪽에 위치한 물체를 레이캐스트하기 위한 원점 offset
     private Vector3 groundRayOffset;                    // 아래에 위치한 물체를 레이캐스트하기 위한 원점 offset
+    private Vector3 headRayOffset;                      // 머리에 위치한 물체를 레이캐스트하기 위한 원점 offset
 
     private RaycastHit2D hit;
     private RaycastHit2D groundHit;
+    private RaycastHit2D headHit;
 
     private float nextJumpTime;
 
     [SerializeField] private bool isGrounded;
+
+    private Coroutine backstepRoutine;                  // 백스텝 실행 여부를 확인할 코루틴 변수
+    private WaitForSeconds wsBackstepReadyTime;         // 백스텝 시작 전 대기 시간
+    private WaitForSeconds wsBackstepTime;              // 백스텝 진행 시간
 
     private void Awake()
     {
@@ -43,10 +51,19 @@ public class Monster : MonoBehaviour
         // 각 방향의 레이캐스트 진행을 위한 원점 offset
         leftRayOffset = Vector3.left * (coll.size.x * 0.55f);
         groundRayOffset = Vector3.down * (coll.size.y * 0.501f);
+        headRayOffset = Vector3.up * (coll.size.y * 0.501f);
+
+        // 코루틴에서 사용할 WaitForSeconds 객체
+        wsBackstepReadyTime = new WaitForSeconds(0.1f);
+        wsBackstepTime = new WaitForSeconds(backstepTime);
     }
 
     private void FixedUpdate()
     {
+        // 백 스텝 중 이동 처리 x
+        if (backstepRoutine != null)
+            return;
+
         // 점프 시간 중 이동 처리 x
         // 점프 도중 이동하여 아래 몬스터의 경계면에 비벼지면서 가속을 받는 문제 방지 
         if (Time.time < nextJumpTime)
@@ -73,6 +90,9 @@ public class Monster : MonoBehaviour
 
         // 애니메이션 상태 관리
         UpdateAnim();
+
+        // 머리 체크
+        CheckHead();
 
         // 땅 체크
         CheckGround();
@@ -125,6 +145,36 @@ public class Monster : MonoBehaviour
 
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         nextJumpTime = Time.time + jumpInterval;
+    }
+
+    private void CheckHead()
+    {
+        Debug.DrawRay(rayOrigin.position + headRayOffset, Vector2.up * headCheckRange, Color.cyan);
+        headHit = Physics2D.Raycast(rayOrigin.position + headRayOffset, Vector2.up, headCheckRange, 1 << gameObject.layer);
+
+        if (headHit.collider == null)
+            return;
+
+        // 머리 위에 몬스터가 있고 백스텝 중이 아니라면 
+        if (headHit.collider.CompareTag("Monster") && backstepRoutine == null)
+            backstepRoutine = StartCoroutine(BackstepRoutine());    // 백스텝 코루틴 실행
+    }
+
+    private IEnumerator BackstepRoutine()
+    {
+        // 위에 있는 몬스터가 완전히 착지하기 까지 여유시간을 준다.
+        yield return wsBackstepReadyTime;
+        rb.velocity = new Vector2(moveSpeed, rb.velocity.y);    // 백 스텝
+
+        // 백스텝 진행 시간동안 대기
+        yield return wsBackstepTime;
+        rb.velocity = new Vector2(0, rb.velocity.y);    // 속도 초기화
+
+        // 백스텝 종료 후 한번 더 대기 
+        yield return wsBackstepTime;
+
+        // 코루틴 끝
+        backstepRoutine = null;
     }
 
     private void CheckGround()
