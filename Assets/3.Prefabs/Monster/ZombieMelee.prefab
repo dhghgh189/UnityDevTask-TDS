@@ -70,14 +70,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ff9d6e961a21c34a9178c1d13c59f95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
+  moveSpeed: 3
   raycastRange: 0.125
   whatIsTarget:
     serializedVersion: 2
     m_Bits: 64
   rayOrigin: {fileID: 3463082177894894911}
-  jumpInterval: 1
-  jumpForce: 4
+  jumpInterval: 0.25
+  jumpForce: 4.7
+  backstepTime: 0.3
   isGrounded: 0
 --- !u!70 &8452590165124511414
 CapsuleCollider2D:

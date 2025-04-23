@@ -47,6 +47,11 @@ public class Monster : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // 점프 시간 중 이동 처리 x
+        // 점프 도중 이동하여 아래 몬스터의 경계면에 비벼지면서 가속을 받는 문제 방지 
+        if (Time.time < nextJumpTime)
+            return;
+
         if (hit.collider == null)
             rb.velocity = new Vector2(-moveSpeed, rb.velocity.y);
         else
