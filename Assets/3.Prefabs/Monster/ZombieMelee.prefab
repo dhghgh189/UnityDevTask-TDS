@@ -74,7 +74,7 @@ MonoBehaviour:
   raycastRange: 0.125
   whatIsTarget:
     serializedVersion: 2
-    m_Bits: 960
+    m_Bits: 64
   rayOrigin: {fileID: 3463082177894894911}
   jumpInterval: 1
   jumpForce: 4

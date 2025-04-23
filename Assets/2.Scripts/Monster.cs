@@ -50,25 +50,13 @@ public class Monster : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //if (curState == EMonsterState.Move)
-        //{
-        //    // 고정된 주기마다 왼쪽으로 이동
-        //    //rb.velocity = Vector2.left* moveSpeed;
-        //    rb.velocity = new Vector2(-moveSpeed, rb.velocity.y);
-        //}
-        //else
-        //{
-        //    rb.velocity = new Vector2(0, rb.velocity.y);
-        //}
-
         if (hit.collider == null)
         {
             rb.velocity = new Vector2(-moveSpeed, rb.velocity.y);
         }
         else
         {
-            if (!hit.collider.CompareTag("Monster") || hit.collider.gameObject.layer == gameObject.layer)
-                rb.velocity = new Vector2(0, rb.velocity.y);
+            rb.velocity = new Vector2(0, rb.velocity.y);
         }
     }
 
@@ -113,9 +101,7 @@ public class Monster : MonoBehaviour
             return;
         }
 
-        if (hit.collider.gameObject.layer == gameObject.layer 
-            && isGrounded
-            && Time.time >= nextJumpTime)
+        if (isGrounded && Time.time >= nextJumpTime)
         {
             Jump();
         }
