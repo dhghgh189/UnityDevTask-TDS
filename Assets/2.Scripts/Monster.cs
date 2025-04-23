@@ -51,13 +51,9 @@ public class Monster : MonoBehaviour
     private void FixedUpdate()
     {
         if (hit.collider == null)
-        {
             rb.velocity = new Vector2(-moveSpeed, rb.velocity.y);
-        }
         else
-        {
             rb.velocity = new Vector2(0, rb.velocity.y);
-        }
     }
 
     void Update()
@@ -121,6 +117,10 @@ public class Monster : MonoBehaviour
 
     private void Jump()
     {
+        // 점프 직전 속도를 초기화한다.
+        // 다른 몬스터의 움직임과 겹치는 경우에도 정상적으로 점프 할 수 있도록 하기 위함
+        rb.velocity = Vector2.zero;
+
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         nextJumpTime = Time.time + jumpInterval;
     }
