@@ -77,9 +77,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   rayOrigin: {fileID: 3463082177894894911}
-  jumpInterval: 0.25
+  jumpInterval: 0.3
   jumpForce: 4.7
   backstepTime: 0.3
+  backstepSpeed: 2.5
+  maxFallSpeed: -3.5
   isGrounded: 0
 --- !u!70 &8452590165124511414
 CapsuleCollider2D:

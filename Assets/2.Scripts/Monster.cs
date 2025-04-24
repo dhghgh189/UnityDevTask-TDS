@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Pool;
 
 public class Monster : MonoBehaviour
 {
@@ -15,6 +14,7 @@ public class Monster : MonoBehaviour
     [SerializeField] private float jumpInterval;        // 점프 쿨타임
     [SerializeField] private float jumpForce;           // 점프 힘
     [SerializeField] private float backstepTime;        // 백 스텝 진행시간
+    [SerializeField] private float backstepSpeed;       // 백 스텝 이동 속도
 
     private EMonsterState curState;                     // 현재 상태
     private Animator anim;                              // Animator 캐시
@@ -29,7 +29,7 @@ public class Monster : MonoBehaviour
     private Vector3 groundRayOffset;                    // 아래에 위치한 물체를 레이캐스트하기 위한 원점 offset
     private Vector3 headRayOffset;                      // 머리에 위치한 물체를 레이캐스트하기 위한 원점 offset
 
-    private RaycastHit2D hit;
+    private RaycastHit2D leftHit;
     private RaycastHit2D groundHit;
     private RaycastHit2D headHit;
 
@@ -52,7 +52,7 @@ public class Monster : MonoBehaviour
         renderers = GetComponentsInChildren<SpriteRenderer>();
 
         // 각 방향의 레이캐스트 진행을 위한 원점 offset
-        leftRayOffset = Vector3.left * (coll.size.x * 0.55f);
+        leftRayOffset = Vector3.left * (coll.size.x * 0.501f);
         groundRayOffset = Vector3.down * (coll.size.y * 0.501f);
         headRayOffset = Vector3.up * (coll.size.y * 0.501f);
 
@@ -85,7 +85,7 @@ public class Monster : MonoBehaviour
         if (Time.time < nextJumpTime)
             return;
 
-        if (hit.collider == null)
+        if (leftHit.collider == null)
             rb.velocity = new Vector2(-moveSpeed, rb.velocity.y);
         else
             rb.velocity = new Vector2(0, rb.velocity.y);
@@ -124,12 +124,12 @@ public class Monster : MonoBehaviour
     {
         // 감지되는 물체가 있으면 Attack 상태로 변경 (임시)
         Debug.DrawRay(rayOrigin.position + leftRayOffset, Vector2.left * raycastRange, Color.red);
-        hit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
+        leftHit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
 
-        if (hit.collider == null)
+        if (leftHit.collider == null)
             return;
 
-        if (!hit.collider.CompareTag("Monster"))
+        if (!leftHit.collider.CompareTag("Monster"))
         {
             curState = EMonsterState.Attack;
             return;
@@ -137,7 +137,10 @@ public class Monster : MonoBehaviour
 
         if (isGrounded && Time.time >= nextJumpTime)
         {
-            Jump();
+            if (Random.value < 0.5f)
+                Jump();
+
+            nextJumpTime = Time.time + jumpInterval;
         }
     }
 
@@ -145,8 +148,8 @@ public class Monster : MonoBehaviour
     {
         // 감지되는 물체가 없으면 Move 상태로 변경
         Debug.DrawRay(rayOrigin.position + leftRayOffset, Vector2.left * raycastRange, Color.red);
-        hit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
-        if (hit.collider == null)
+        leftHit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
+        if (leftHit.collider == null)
         {
             curState = EMonsterState.Move;
             return;
@@ -172,7 +175,6 @@ public class Monster : MonoBehaviour
         rb.velocity = Vector2.zero;
 
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-        nextJumpTime = Time.time + jumpInterval;
     }
 
     private void CheckHead()
@@ -180,19 +182,22 @@ public class Monster : MonoBehaviour
         Debug.DrawRay(rayOrigin.position + headRayOffset, Vector2.up * headCheckRange, Color.cyan);
         headHit = Physics2D.Raycast(rayOrigin.position + headRayOffset, Vector2.up, headCheckRange, 1 << gameObject.layer);
 
-        if (headHit.collider == null)
+        if (headHit.collider == null || !headHit.collider.CompareTag("Monster"))
             return;
 
-        // 머리 위에 몬스터가 있고 백스텝 중이 아니라면 
-        if (headHit.collider.CompareTag("Monster") && backstepRoutine == null)
+        // 백스텝 중이 아니고 자신이 맨 앞 몬스터라면
+        if (backstepRoutine == null &&
+            leftHit.collider != null && !leftHit.collider.CompareTag("Monster"))
+        {
             backstepRoutine = StartCoroutine(BackstepRoutine());    // 백스텝 코루틴 실행
+        }
     }
 
     private IEnumerator BackstepRoutine()
     {
         // 위에 있는 몬스터가 완전히 착지하기 까지 여유시간을 준다.
         yield return wsBackstepReadyTime;
-        rb.velocity = new Vector2(moveSpeed, rb.velocity.y);    // 백 스텝
+        rb.velocity = new Vector2(backstepSpeed, rb.velocity.y);    // 백 스텝
 
         // 백스텝 진행 시간동안 대기
         yield return wsBackstepTime;
