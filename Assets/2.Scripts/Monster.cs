@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class Monster : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class Monster : MonoBehaviour
     private Animator anim;                              // Animator 캐시
     private Rigidbody2D rb;                             // Rigidbody2D 캐시
     private CapsuleCollider2D coll;                     // CapsuleCollider2D 캐시
+    private SpriteRenderer[] renderers;                 // Sorting Layer 설정을 위한 Sprite Renderer 캐시
 
     private int isAttackingHash = Animator.StringToHash("IsAttacking");
     private int isDeadHash = Animator.StringToHash("IsDead");
@@ -47,6 +49,7 @@ public class Monster : MonoBehaviour
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<CapsuleCollider2D>();
+        renderers = GetComponentsInChildren<SpriteRenderer>();
 
         // 각 방향의 레이캐스트 진행을 위한 원점 offset
         leftRayOffset = Vector3.left * (coll.size.x * 0.55f);
@@ -137,6 +140,18 @@ public class Monster : MonoBehaviour
         }
     }
 
+    // 몬스터의 Lane 설정 및 필요한 초기화 수행
+    public void SetLane(int iLane)
+    {
+        // 레이어 설정
+        gameObject.layer = LayerMask.NameToLayer($"Lane{iLane}");
+        // target layermask 설정
+        whatIsTarget = (1 << LayerMask.NameToLayer("Box")) | (1 << gameObject.layer);
+        // sorting layer 설정
+        for (int i = 0; i < renderers.Length; i++)
+            renderers[i].sortingLayerID = Define.LaneSortingLayerID[iLane];
+    }
+
     private void Jump()
     {
         // 점프 직전 속도를 초기화한다.
@@ -187,10 +202,5 @@ public class Monster : MonoBehaviour
     protected virtual void OnAttack()
     {
 
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        Debug.Log($"{gameObject.name}가 {collision.gameObject.name}에 부딪힘");
     }
 }
