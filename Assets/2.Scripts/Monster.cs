@@ -41,11 +41,11 @@ public class Monster : MonoBehaviour
     private WaitForSeconds wsBackstepReadyTime;         // 백스텝 시작 전 대기 시간
     private WaitForSeconds wsBackstepTime;              // 백스텝 진행 시간
 
+    private Pool<Monster> returnPool;            // 반납을 위한 풀 참조
+    public Pool<Monster> ReturnPool { set { returnPool = value; } }
+
     private void Awake()
     {
-        // 초기 상태 = move
-        curState = EMonsterState.Move;
-
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<CapsuleCollider2D>();
@@ -59,6 +59,19 @@ public class Monster : MonoBehaviour
         // 코루틴에서 사용할 WaitForSeconds 객체
         wsBackstepReadyTime = new WaitForSeconds(0.1f);
         wsBackstepTime = new WaitForSeconds(backstepTime);
+    }
+
+    private void OnEnable()
+    {
+        // 초기 상태 = move
+        curState = EMonsterState.Move;
+        nextJumpTime = 0;
+    }
+
+    private void OnDisable()
+    {
+        if (backstepRoutine != null)
+            backstepRoutine = null;
     }
 
     private void FixedUpdate()

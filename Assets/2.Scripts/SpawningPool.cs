@@ -55,6 +55,7 @@ public class SpawningPool : MonoBehaviour
                 Monster monster = monsterPool.Get();
                 monster.SetLane(iLane);                     // Lane 설정
                 monster.transform.position = spawnPos;      // 위치 설정
+                monster.ReturnPool = monsterPool;           // 추후 반납을 위한 pool 참조 전달
 
                 // 몬스터 카운트 증가
                 monsterCount++;
