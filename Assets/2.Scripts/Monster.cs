@@ -107,6 +107,9 @@ public class Monster : MonoBehaviour
         // 애니메이션 상태 관리
         UpdateAnim();
 
+        // 전방 체크
+        CheckLeft();
+
         // 머리 체크
         CheckHead();
 
@@ -122,10 +125,6 @@ public class Monster : MonoBehaviour
 
     protected virtual void UpdateMove()
     {
-        // 감지되는 물체가 있으면 Attack 상태로 변경 (임시)
-        Debug.DrawRay(rayOrigin.position + leftRayOffset, Vector2.left * raycastRange, Color.red);
-        leftHit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
-
         if (leftHit.collider == null)
             return;
 
@@ -146,10 +145,8 @@ public class Monster : MonoBehaviour
 
     protected virtual void UpdateAttack()
     {
-        // 감지되는 물체가 없으면 Move 상태로 변경
-        Debug.DrawRay(rayOrigin.position + leftRayOffset, Vector2.left * raycastRange, Color.red);
-        leftHit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
-        if (leftHit.collider == null)
+        // 공격 대상이 감지되지 않으면 Move 상태로 변경
+        if (leftHit.collider == null || leftHit.collider.CompareTag("Monster"))
         {
             curState = EMonsterState.Move;
             return;
@@ -175,6 +172,12 @@ public class Monster : MonoBehaviour
         rb.velocity = Vector2.zero;
 
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+    }
+
+    private void CheckLeft()
+    {
+        Debug.DrawRay(rayOrigin.position + leftRayOffset, Vector2.left * raycastRange, Color.red);
+        leftHit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
     }
 
     private void CheckHead()
