@@ -110,8 +110,12 @@ public class Monster : MonoBehaviour
         // 전방 체크
         CheckLeft();
 
-        // 머리 체크
-        CheckHead();
+        // 자신이 맨 앞 오브젝트인 경우에만 머리 체크
+        if (leftHit.collider != null && !leftHit.collider.CompareTag("Monster"))
+        {
+            // 머리 체크
+            CheckHead();
+        }
 
         // 땅 체크
         CheckGround();
@@ -188,9 +192,8 @@ public class Monster : MonoBehaviour
         if (headHit.collider == null || !headHit.collider.CompareTag("Monster"))
             return;
 
-        // 백스텝 중이 아니고 자신이 맨 앞 몬스터라면
-        if (backstepRoutine == null &&
-            leftHit.collider != null && !leftHit.collider.CompareTag("Monster"))
+        // 백스텝 중이 아니라면
+        if (backstepRoutine == null)
         {
             backstepRoutine = StartCoroutine(BackstepRoutine());    // 백스텝 코루틴 실행
         }
