@@ -26,7 +26,7 @@ public class SpawningPool : MonoBehaviour
 
     void Start()
     {
-        truckTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        truckTransform = GameObject.FindGameObjectWithTag(Define.TruckTag).transform;
 
         // 몬스터 스폰 코루틴 시작
         spawnRoutine = StartCoroutine(SpawnRoutine());

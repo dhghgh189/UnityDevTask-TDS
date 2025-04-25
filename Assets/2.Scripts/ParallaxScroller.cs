@@ -11,9 +11,16 @@ public class ParallaxScroller : MonoBehaviour
     private Camera mainCam;     // 카메라 컴포넌트 캐시
     private float currentGap;   // layer 오브젝트와 카메라 간의 간격 저장
 
+    private Truck truck;
+
     private void Awake()
     {
         mainCam = Camera.main;
+    }
+
+    private void Start()
+    {
+        truck = GameObject.FindGameObjectWithTag(Define.TruckTag).GetComponent<Truck>();
     }
 
     private void Update()
@@ -22,7 +29,7 @@ public class ParallaxScroller : MonoBehaviour
         foreach (var info in scrollInfoList)
         {
             // 현재 layer 오브젝트를 왼쪽으로 이동 (스크롤)
-            info.layer.position += Vector3.left * info.scrollSpeed * Time.deltaTime;
+            info.layer.position += Vector3.left * (info.scrollSpeed * truck.SpeedRatio) * Time.deltaTime;
 
             // layer 오브젝트와 카메라의 x값 차이를 확인
             currentGap = Mathf.Abs(mainCam.transform.position.x - info.layer.position.x);

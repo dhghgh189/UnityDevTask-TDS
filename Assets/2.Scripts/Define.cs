@@ -14,4 +14,5 @@ public class Define
     };
 
     public static string MonsterTag = "Monster";
+    public static string TruckTag = "Player";
 }
