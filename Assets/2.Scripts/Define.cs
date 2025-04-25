@@ -12,4 +12,6 @@ public class Define
         SortingLayer.NameToID("Lane1"),
         SortingLayer.NameToID("Lane2")
     };
+
+    public static string MonsterTag = "Monster";
 }

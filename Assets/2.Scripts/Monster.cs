@@ -112,7 +112,7 @@ public class Monster : MonoBehaviour
         CheckLeft();
 
         // 자신이 맨 앞 오브젝트인 경우에만 머리 체크
-        if (leftHit.collider != null && !leftHit.collider.CompareTag("Monster"))
+        if (leftHit.collider != null && !leftHit.collider.CompareTag(Define.MonsterTag))
         {
             // 머리 체크
             CheckHead();
@@ -135,7 +135,7 @@ public class Monster : MonoBehaviour
             return;
 
         // 몬스터가 아닌 물체가 감지되면 공격
-        if (!leftHit.collider.CompareTag("Monster"))
+        if (!leftHit.collider.CompareTag(Define.MonsterTag))
         {
             curState = EMonsterState.Attack;
             return;
@@ -156,7 +156,7 @@ public class Monster : MonoBehaviour
     protected virtual void UpdateAttack()
     {
         // 공격 대상이 감지되지 않으면 Move 상태로 변경
-        if (leftHit.collider == null || leftHit.collider.CompareTag("Monster"))
+        if (leftHit.collider == null || leftHit.collider.CompareTag(Define.MonsterTag))
         {
             curState = EMonsterState.Move;
             return;
@@ -199,7 +199,7 @@ public class Monster : MonoBehaviour
 #endif
         headHit = Physics2D.Raycast(rayOrigin.position + headRayOffset, Vector2.up, headCheckRange, 1 << gameObject.layer);
 
-        if (headHit.collider == null || !headHit.collider.CompareTag("Monster"))
+        if (headHit.collider == null || !headHit.collider.CompareTag(Define.MonsterTag))
             return;
 
         // 백스텝 중이 아니라면
