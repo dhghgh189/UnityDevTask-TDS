@@ -22,6 +22,7 @@ public class Monster : MonoBehaviour
     private CapsuleCollider2D coll;                     // CapsuleCollider2D 캐시
     private SpriteRenderer[] renderers;                 // Sorting Layer 설정을 위한 Sprite Renderer 캐시
 
+    // 애니메이션 파라미터 ID
     private int isAttackingHash = Animator.StringToHash("IsAttacking");
     private int isDeadHash = Animator.StringToHash("IsDead");
 
@@ -33,7 +34,7 @@ public class Monster : MonoBehaviour
     private RaycastHit2D groundHit;
     private RaycastHit2D headHit;
 
-    private float nextJumpTime;
+    private float nextJumpTime;                         // 다음 점프 가능 시간
 
     [SerializeField] private bool isGrounded;
 
@@ -123,6 +124,7 @@ public class Monster : MonoBehaviour
 
     protected virtual void UpdateAnim()
     {
+        // 상태에 따른 애니메이션 파라미터 설정
         anim.SetBool(isAttackingHash, curState == EMonsterState.Attack);
         anim.SetBool(isDeadHash, curState == EMonsterState.Dead);
     }
@@ -132,17 +134,21 @@ public class Monster : MonoBehaviour
         if (leftHit.collider == null)
             return;
 
+        // 몬스터가 아닌 물체가 감지되면 공격
         if (!leftHit.collider.CompareTag("Monster"))
         {
             curState = EMonsterState.Attack;
             return;
         }
 
+        // 현재 땅에 있는 경우 점프 가능 상태라면
         if (isGrounded && Time.time >= nextJumpTime)
         {
+            // 확률로 점프
             if (Random.value < 0.5f)
                 Jump();
 
+            // 다음 점프 가능 시간 갱신
             nextJumpTime = Time.time + jumpInterval;
         }
     }
@@ -180,13 +186,17 @@ public class Monster : MonoBehaviour
 
     private void CheckLeft()
     {
+#if UNITY_EDITOR
         Debug.DrawRay(rayOrigin.position + leftRayOffset, Vector2.left * raycastRange, Color.red);
+#endif
         leftHit = Physics2D.Raycast(rayOrigin.position + leftRayOffset, Vector2.left, raycastRange, whatIsTarget);
     }
 
     private void CheckHead()
     {
+#if UNITY_EDITOR
         Debug.DrawRay(rayOrigin.position + headRayOffset, Vector2.up * headCheckRange, Color.cyan);
+#endif
         headHit = Physics2D.Raycast(rayOrigin.position + headRayOffset, Vector2.up, headCheckRange, 1 << gameObject.layer);
 
         if (headHit.collider == null || !headHit.collider.CompareTag("Monster"))
@@ -218,7 +228,9 @@ public class Monster : MonoBehaviour
 
     private void CheckGround()
     {
+#if UNITY_EDITOR
         Debug.DrawRay(rayOrigin.position + groundRayOffset, Vector2.down * raycastRange, Color.blue);
+#endif
         groundHit = Physics2D.Raycast(rayOrigin.position + groundRayOffset, Vector2.down, raycastRange, 1 << gameObject.layer);
         isGrounded = groundHit.collider != null;
     }
